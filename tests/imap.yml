@@ -1,4 +1,4 @@
-name: SMTP & IMAP testsuite
+name: IMAP testsuite
 vars:
   host: localhost
   port: 1993

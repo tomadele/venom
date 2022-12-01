@@ -32,7 +32,7 @@ Each command consists of a `name` field which allows to specify the command to e
 Then they are composed of the `search` field and/or the `args` field.
 
 The `search` field always has the same syntax. It retrieves and returns the first mail found through the search criteria:
-````yaml
+```yaml
 search:
   mailbox: testBox # The mailbox in which to search the mail
   uid: 1 # The UID to search for
@@ -40,7 +40,7 @@ search:
   to: you@company.tld # The "To" header field to search for
   subject: Title of mail with * # The "Subject" header field to search for
   body: .*a body content.* # The "Body" field to search for
-````
+```
 It allows us to specify which mail the command will act upon.
 
 Often combined to the search field, the `args` field allows us to specify the arguments to the command.
@@ -66,10 +66,6 @@ commands:
         - Flag2
         ...
 ```
-
-The result of the append command 
-
-
 
 #### Create command
 
@@ -177,7 +173,8 @@ Taking that multiple commands can be executed in a single testcase, the `result`
   "result": {
     "commands": [
       {
-        "search": { // Search represents the result of the command's search field
+        // Search represents the result of the command's search field
+        "search": {
           "mailbox": "INBOX",
           "from": "from@mail-before-command-execution.com",
           "to": "to@mail-before-command-execution.com",
@@ -185,11 +182,11 @@ Taking that multiple commands can be executed in a single testcase, the `result`
           "body": "Body content of mail BEFORE command execution",
           "flags": [
             "Flag1",
-            "Flag2",
-            ...
+            "Flag2"
           ]
         },
-        "mail": { // Mail represents the state of the searched mail after the command was executed
+        // Mail represents the state of the searched mail after the command was executed
+        "mail": { 
           "from": "from@mail-after-command-execution.com",
           "to": "to@mail-after-command-execution.com",
           "subject": "Title of mail AFTER command execution",
@@ -197,14 +194,12 @@ Taking that multiple commands can be executed in a single testcase, the `result`
           "flags": [
             "Flag1",
             "Flag2",
-            "Flag3",
-            ...
+            "Flag3"
           ]
         },
         "err": "Error of the command", // Err represents the command error message, supposing the command failed
-        "timeseconds": 1.5, // TimeSeconds represents the duration of the command execution
-      },
-      ...
+        "timeseconds": 1.5 // TimeSeconds represents the duration of the command execution
+      }
     ]
   }
 }
@@ -212,7 +207,7 @@ Taking that multiple commands can be executed in a single testcase, the `result`
 Where each command has its own results that can be asserted.
 
 As an example, here is a list of possible assertions after execution of two commands in the same testcase:
-````yaml
+```yaml
 assertions:
   # First ommand
   - result.commands.commands0.err ShouldBeEmpty
@@ -226,7 +221,7 @@ assertions:
   - result.commands.commands1.mail.from ShouldEqual ...
   - result.commands.commands1.mail.flags.flags0 ShouldEqual ...
   - result.commands.commands1.mail.flags.flags1 ShouldEqual ...
-````
+```
 
 The commands that do not modify a mail content (headers and body) won't have the `mail` field filled up.\
 As an example, here is the typical result of a `fetch`, `delete` or `move` command:
@@ -269,6 +264,33 @@ As another example, here is the typical result of a `create` or `clear` command:
 }
 ```
 
-## Whole testcase example
+## Testsuite example
 
-To see detailed test cases examples, check the [IMAP YAML test file](../../tests/imap.yml).
+```yml
+name: IMAP testsuite
+vars:
+  host: localhost
+  port: 1993
+  user: address@example.org
+  password: pass
+  loglevel: info
+testcases:
+  - name: Clear a mailbox
+    steps:
+      - type: imap
+        auth:
+          host: "{{.host}}"
+          port: "{{.port}}"
+          user: "{{.user}}"
+          password: "{{.password}}"
+        commands:
+          - name: clear
+            args:
+              mailboxes:
+                - INBOX
+        assertions:
+          # As multiple commands can be executed in a single testcase, we need to specify which command result we want to assert
+          - result.commands.commands0.err ShouldBeEmpty
+```
+
+To see more examples, check the [IMAP executor test file](../../tests/imap.yml).
