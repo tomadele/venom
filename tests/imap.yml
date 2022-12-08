@@ -1,19 +1,19 @@
 name: IMAP testsuite
 vars:
-  host: localhost
-  port: 1993
-  user: address@example.org
-  password: pass
-  loglevel: info
+  imapHost: gw2sdev-docker.ovh.net
+  imapPort: 12422
+  imapUser: imap@venom.com
+  imapPassword: imapvenompassword
 testcases:
   - name: Clear a mailbox
     steps:
       - type: imap
         auth:
-          host: "{{.host}}"
-          port: "{{.port}}"
-          user: "{{.user}}"
-          password: "{{.password}}"
+          withtls: false
+          host: "{{.imapHost}}"
+          port: "{{.imapPort}}"
+          user: "{{.imapUser}}"
+          password: "{{.imapPassword}}"
         commands:
           - name: clear
             args:
@@ -27,10 +27,11 @@ testcases:
     steps:
       - type: imap
         auth:
-          host: "{{.host}}"
-          port: "{{.port}}"
-          user: "{{.user}}"
-          password: "{{.password}}"
+          withtls: false
+          host: "{{.imapHost}}"
+          port: "{{.imapPort}}"
+          user: "{{.imapUser}}"
+          password: "{{.imapPassword}}"
         commands:
           - name: clear
             args:
@@ -43,10 +44,11 @@ testcases:
     steps:
       - type: imap
         auth:
-          host: "{{.host}}"
-          port: "{{.port}}"
-          user: "{{.user}}"
-          password: "{{.password}}"
+          withtls: false
+          host: "{{.imapHost}}"
+          port: "{{.imapPort}}"
+          user: "{{.imapUser}}"
+          password: "{{.imapPassword}}"
         commands:
           - name: create
             args:
@@ -74,10 +76,11 @@ testcases:
     steps:
       - type: imap
         auth:
-          host: "{{.host}}"
-          port: "{{.port}}"
-          user: "{{.user}}"
-          password: "{{.password}}"
+          withtls: false
+          host: "{{.imapHost}}"
+          port: "{{.imapPort}}"
+          user: "{{.imapUser}}"
+          password: "{{.imapPassword}}"
         commands:
           - name: fetch
             search:
@@ -98,10 +101,11 @@ testcases:
     steps:
       - type: imap
         auth:
-          host: "{{.host}}"
-          port: "{{.port}}"
-          user: "{{.user}}"
-          password: "{{.password}}"
+          withtls: false
+          host: "{{.imapHost}}"
+          port: "{{.imapPort}}"
+          user: "{{.imapUser}}"
+          password: "{{.imapPassword}}"
         commands:
           - name: move
             search:
@@ -141,14 +145,16 @@ testcases:
           # Commands that modify mails do a FETCH right after to make sure the command succeeded.
           # Doing so implicitly adds the "\Seen" flag to the mail
           - result.commands.commands1.mail.flags.flags2 ShouldEqual \Seen
+
   - name: Set flags and delete mail
     steps:
       - type: imap
         auth:
-          host: "{{.host}}"
-          port: "{{.port}}"
-          user: "{{.user}}"
-          password: "{{.password}}"
+          withtls: false
+          host: "{{.imapHost}}"
+          port: "{{.imapPort}}"
+          user: "{{.imapUser}}"
+          password: "{{.imapPassword}}"
         commands:
           - name: flag
             search:

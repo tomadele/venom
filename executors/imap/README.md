@@ -9,10 +9,11 @@ Venom IMAP executor implements a few IMAP commands such as FETCH, APPEND, MOVE, 
 
 ```yaml
 auth:
+  withtls: false
   host: yourimaphost
-  port: 993
-  user: yourimapuser
-  password: yourimappassword
+  port: 143 # Most probably 993 if using TLS
+  user: imap@venom.com
+  password: imapvenompassword
 ```
 
 ### Commands
