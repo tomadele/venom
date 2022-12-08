@@ -285,6 +285,7 @@ type Client struct {
 }
 
 type AuthConfig struct {
+	WithTLS  bool   `json:"withtls,omitempty" yaml:"withtls,omitempty"`
 	Host     string `json:"host,omitempty" yaml:"host,omitempty"`
 	Port     string `json:"port,omitempty" yaml:"port,omitempty"`
 	User     string `json:"user,omitempty" yaml:"user,omitempty"`
@@ -314,7 +315,7 @@ func (Executor) Run(ctx context.Context, step venom.TestStep) (interface{}, erro
 		return nil, err
 	}
 
-	c, err := connect(e.Auth.Host, e.Auth.Port, e.Auth.User, e.Auth.Password)
+	c, err := e.connect(e.Auth.Host, e.Auth.Port, e.Auth.User, e.Auth.Password)
 	if err != nil {
 		return nil, fmt.Errorf("Error while connecting: %w", err)
 	}
@@ -870,17 +871,27 @@ func (c *Client) countNumberOfMessagesInMailbox(mailbox string) (uint32, error) 
 	return count, nil
 }
 
-func connect(host, port, imapUsername, imapPassword string) (*imap.Client, error) {
-	c, err := imap.DialTLS(host+":"+port, &tls.Config{
-		InsecureSkipVerify: true,
-	})
-	if err != nil {
-		return nil, fmt.Errorf("unable to dial: %s", err)
-	}
-
-	if c.Caps["STARTTLS"] {
-		if _, err = imap.Wait(c.StartTLS(nil)); err != nil {
-			return nil, fmt.Errorf("unable to start TLS: %s", err)
+func (e Executor) connect(host, port, imapUsername, imapPassword string) (*imap.Client, error) {
+	var (
+		err error
+		c   *imap.Client
+	)
+	if e.Auth.WithTLS {
+		c, err = imap.DialTLS(host+":"+port, &tls.Config{
+			InsecureSkipVerify: true,
+		})
+		if err != nil {
+			return nil, fmt.Errorf("unable to dialTLS: %s", err)
+		}
+		if c.Caps["STARTTLS"] {
+			if _, err = imap.Wait(c.StartTLS(nil)); err != nil {
+				return nil, fmt.Errorf("unable to start TLS: %s", err)
+			}
+		}
+	} else {
+		c, err = imap.Dial(host + ":" + port)
+		if err != nil {
+			return nil, fmt.Errorf("unable to dial: %s", err)
 		}
 	}
 
