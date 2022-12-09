@@ -4,7 +4,6 @@ import (
 	"context"
 	"crypto/tls"
 	"fmt"
-	"regexp"
 	"strings"
 	"time"
 
@@ -310,8 +309,6 @@ func (Executor) GetDefaultAssertions() *venom.StepAssertions {
 
 // Run execute TestStep of type exec
 func (Executor) Run(ctx context.Context, step venom.TestStep) (interface{}, error) {
-	venom.InitTestLogger("debug")
-
 	var e Executor
 	if err := mapstructure.Decode(step, &e); err != nil {
 		return nil, err
@@ -763,26 +760,31 @@ func (m *Mail) isSearched(mailToFind SearchCriteria) (bool, error) {
 		}
 	}
 	if mailToFind.From != "" {
-		matched, err = regexp.MatchString(mailToFind.From, m.From)
-		if err != nil || !matched {
+		matched = strings.Contains(m.From, mailToFind.From)
+		if !matched {
 			return false, err
 		}
 	}
 	if mailToFind.To != "" {
-		matched, err = regexp.MatchString(mailToFind.To, m.To)
-		if err != nil || !matched {
+		matched = strings.Contains(m.To, mailToFind.To)
+		if !matched {
 			return false, err
 		}
 	}
 	if mailToFind.Subject != "" {
-		matched, err = regexp.MatchString(mailToFind.Subject, m.Subject)
-		if err != nil || !matched {
+		matched = strings.Contains(m.Subject, mailToFind.Subject)
+		if !matched {
 			return false, err
 		}
 	}
 	if mailToFind.Body != "" {
-		matched, err = regexp.MatchString(mailToFind.Body, m.Body)
-		if err != nil || !matched {
+		// As a body can have complex characters, we need to remove all special characters that can make the match fail
+		replacer := strings.NewReplacer("\n", "", "\r", "", "\t", "")
+		m.Body = replacer.Replace(m.Body)
+		mailToFind.Body = replacer.Replace(mailToFind.Body)
+
+		matched = strings.Contains(m.Body, mailToFind.Body)
+		if !matched {
 			return false, err
 		}
 	}
