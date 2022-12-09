@@ -310,6 +310,8 @@ func (Executor) GetDefaultAssertions() *venom.StepAssertions {
 
 // Run execute TestStep of type exec
 func (Executor) Run(ctx context.Context, step venom.TestStep) (interface{}, error) {
+	venom.InitTestLogger("debug")
+
 	var e Executor
 	if err := mapstructure.Decode(step, &e); err != nil {
 		return nil, err
@@ -442,7 +444,7 @@ func (c *Client) appendMail(ctx context.Context, args commandAppendArgs) Command
 		fmt.Sprintf("From: %s", args.from),
 		fmt.Sprintf("Subject: %s", args.subject),
 		fmt.Sprintf("To: %s", args.to),
-		"Content-Type: plain/text",
+		"Content-Type: TEXT/PLAIN; CHARSET=UTF-8",
 		"",
 		args.body,
 		"",
@@ -889,7 +891,7 @@ func (e Executor) connect(host, port, imapUsername, imapPassword string) (*imap.
 			}
 		}
 	} else {
-		c, err = imap.Dial(host + ":" + port)
+		c, err = imap.Dial(host + ":" + port) // Bloquant si le serveur n'accepte que le TLS (tourne en boucle ? Essayer avec image imap-integration)
 		if err != nil {
 			return nil, fmt.Errorf("unable to dial: %s", err)
 		}
